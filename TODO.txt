@@ -1,0 +1,6 @@
+Steps:
+1. Convert (Py->Erl) simple math operations: x + y, x - y, x * y, x / y
+2. Convert function which performs operations from 1
+3. Convert print to io:format
+4. Convert if
+5. Convert for

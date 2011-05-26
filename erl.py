@@ -1,109 +1,27 @@
 # -*- coding: utf-8 -*-
 
-"""Printable primitives of Erlang AST: attributes, atoms, lists, functions, etc.
-"""
+'''Function which convert python AST nodes into Erlang abstract form'''
 
-import logging
+def name_form(val):
+    """Pythons' variables (variable name)"""
+    return "{var, 1, '%s'}" % val.upper()
 
-class Primitives(object):
-    pass
+def const_form(val):
+    """Represent Python constant, e.g. 10, "string", 23.23"""
+    return '{integer, 1, %s}' % val
 
-class Attribute(Primitives):
+def add_form(p1, p2):
+    """Add operator"""
+    return "{op, 1, '+', %s, %s}" % (p1, p2)
 
-    def __init__(self, name, arguments):
-        self.name = name
-        self.arguments = arguments
+def function_form(name, argnames, clauses):
+    params = ','.join([name_form(arg) for arg in argnames])
+    return "{'%(name)s', 1, {clauses, [{clause, 1, [%(params)s], [], %(clause)s}]} }" % {
+            'name': name, 'params': params, 'clause': clauses
+        }
 
-    def __str__(self):
-        args = ','.join([str(arg) for arg in self.arguments])
-        return 'erl_syntax:attribute(%s, [%s])' % (str(self.name), args)
+def stmt_form(nodes):
+    return '[%s]' % ','.join(nodes)
 
-class Atom(Primitives):
-
-    def __init__(self, name):
-        self.name = name
-
-    def __str__(self):
-        return 'erl_syntax:atom("%s")' % self.name
-
-class List(Primitives):
-
-    def __init__(self, elements, tail):
-        self.elements = elements
-        self.tail = tail
-
-    def __str__(self):
-        elements = ','.join([str(el) for el in self.elements])
-        return 'erl_syntax:list(%s)' % elements
-
-class Integer(Primitives):
-
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return 'erl_syntax:integer(%s)' % self.value
-
-class ArityQualifier(Primitives):
-
-    def __init__(self, name, arity):
-        self.name = name
-        self.arity = arity
-
-    def __str__(self):
-        arity = ','.join((str(self.name), str(self.arity)))
-        return 'erl_syntax:arity_qualifier(%s)' % arity
-
-def create_module(name):
-    """Create AST which represent module.
-    Erlang code:
-        ModAST = erl_syntax:attribute(erl_syntax:atom(module),
-                                       [erl_syntax:atom("mod_name")])
-    """
-    return Attribute('module', [Atom(name)])
-
-def create_export(name, arity):
-    """Create AST which represent all exports.
-    Erlang code:
-        ExpAST = erl_syntax:attribute(erl_syntax:atom(export),
-                                            [erl_syntax:list(
-                                                [erl_syntax:arity_qualifier(
-                                                    erl_syntax:atom("fn_name"),
-                                                    erl_syntax:integer(0))])])
-    """
-    return Attribute('export', [List([ArityQualifier(Atom(name),
-                                                    Integer(arity))], None)])
-
-def create_function(name, clauses):
-    """Create functions AST.
-    Erlang code:
-        FuncAST = erl_syntax:function(erl_syntax:atom("fn_name"),
-                                        [erl_syntax:clause(
-                                            %....
-                                            )])
-    Not implemented.
-    """
-    logging.warning("Function convertion is not implemented")
-
-def compose_ast(module, exports, functions):
-    return compile_template % {'mod': str(module),
-                               'exp': [str(e) for e in exports],
-                               'func': [str(e) for e in functions]}
-
-compile_template = '''
--module(gen).
--export([make/0]).
-
-make() ->
-    ModAST = %(mod)s,
-    ExpAST = %(exp)s,
-    FuncsAST = %(func)s,
-
-    Items = [ModAST] ++ ExpAST ++ FuncsAST,
-    Forms = [erl_syntax:revert(AST) || AST <- Items],
-
-    case compile:forms(Forms) of
-        {ok,ModuleName,Binary} -> code:load_binary(ModuleName, "gen", Binary);
-        {ok,ModuleName,Binary,_Warnings} -> code:load_binary(ModuleName, "gen", Binary)
-    end.
-'''
+def return_form(nodes):
+    return ','.join(nodes)
