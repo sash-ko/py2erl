@@ -16,8 +16,8 @@ def add_form(p1, p2):
 
 def function_form(name, argnames, clauses):
     params = ','.join([name_form(arg) for arg in argnames])
-    return "{'%(name)s', 1, {clauses, [{clause, 1, [%(params)s], [], %(clause)s}]} }" % {
-            'name': name, 'params': params, 'clause': clauses
+    return "{function, 1, '%(name)s', %(args_num)s, [{clause, 1, [%(params)s], [], %(clause)s}] }" % {
+            'name': name, 'args_num':len(argnames), 'params': params, 'clause': clauses
         }
 
 def stmt_form(nodes):

@@ -30,7 +30,8 @@ if __name__ == '__main__':
 
                 visitor = ModuleVisitor()
                 walk(module_tree, visitor)
-                print visitor.tree
+                for c in visitor.tree:
+                    print c
 
             #erl_out = compose_ast(visitor.erl_module,
             #                        visitor.erl_exports,
