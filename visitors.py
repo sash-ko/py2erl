@@ -5,6 +5,9 @@ from compiler.visitor import ASTVisitor, walk
 import erl
 
 class ModuleVisitor(ASTVisitor):
+    """Recursively traverse Python AST and convert
+    it to Erlang abstract form
+    """
 
     def __init__(self):
         ASTVisitor.__init__(self)
