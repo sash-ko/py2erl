@@ -46,7 +46,7 @@ def function_af(fn_name, argnames, clauses, lineno=1):
     clauses = ','.join([_clause_af(argnames, c, lineno) for c in clauses])
     fmt = {'fn_name': fn_name, 'argnum': len(argnames), 'clauses': clauses,
             'lineno': lineno}
-    return '{{function, 1, {fn_name}, {argnum}, [{clauses}]}}'.format(**fmt)
+    return '{{function, {lineno}, {fn_name}, {argnum}, [{clauses}]}}'.format(**fmt)
 
 def stmt_form(nodes):
     logging.warning('There is no abstract equivalent of Pythons Stmt')

@@ -31,14 +31,13 @@ if __name__ == '__main__':
 
                 visitor = ModuleVisitor()
                 walk(module_tree, visitor)
-                for c in visitor.tree:
-                    print c
+                erl_abstract = ''.join(visitor.tree)
 
-            #erl_out = compose_ast(visitor.erl_module,
-            #                        visitor.erl_exports,
-            #                        visitor.erl_functions)
+                print erl_abstract
+
         except AbstractFormError, e:
             print 'Abstract form error:', e
+            logging.exception(e)
         except IOError, e:
             print 'Error while reading', fname
             logging.exception(e)
@@ -48,10 +47,5 @@ if __name__ == '__main__':
         except Exception, e:
             print 'Error occured', e
             logging.exception(e)
-
-        #if erl_out:
-        #    with open('gen.erl', 'w') as out:
-        #        out.write(erl_out)
-        #        print 'Output saved to gen.erl'
     else:
         print 'Usage: python py2erl.py python_in'
