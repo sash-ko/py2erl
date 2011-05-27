@@ -1,27 +1,57 @@
 # -*- coding: utf-8 -*-
 
-'''Function which convert python AST nodes into Erlang abstract form'''
+import logging
+from errors import AbstractFormError
 
-def name_form(val):
-    """Pythons' variables (variable name)"""
-    return "{var, 1, '%s'}" % val.upper()
+def variable_af(varname, lineno=1):
+    """Variable abstract form (variable name).
+    Require further values binding.
+    """
 
-def const_form(val):
-    """Represent Python constant, e.g. 10, "string", 23.23"""
-    return '{integer, 1, %s}' % val
+    varname = varname.capitalize()
+    fmt = locals()
+    return "{{var, {lineno}, '{varname}'}}".format(**fmt)
 
-def add_form(p1, p2):
-    """Add operator"""
-    return "{op, 1, '+', %s, %s}" % (p1, p2)
+def number_af(val, lineno=1):
+    fmt = locals()
+    if isinstance(val, float):
+        fmt['typename'] = 'float'
+    elif isinstance(val, int):
+        fmt['typename'] = 'integer'
+    else:
+        raise AbstractFormError('Number', val)
+    return '{{{typename}, {lineno}, {val}}}'.format(**fmt)
 
-def function_form(name, argnames, clauses):
-    params = ','.join([name_form(arg) for arg in argnames])
-    return "{function, 1, '%(name)s', %(args_num)s, [{clause, 1, [%(params)s], [], %(clause)s}] }" % {
-            'name': name, 'args_num':len(argnames), 'params': params, 'clause': clauses
-        }
+def addition_af(left, right, lineno=1):
+    """Abstract form of addition operation"""
+    return _binary_op_af('+', left, right, lineno)
+
+def substraction_af(left, right, lineno=1):
+    """Abstract form of addition operation"""
+    return _binary_op_af('-', left, right, lineno)
+
+def _binary_op_af(op, left, right, lineno=1):
+    """Abstract form of binary operations"""
+
+    fmt = locals()
+    return "{{op, {lineno}, '{op}', {left}, {right}}}".format(**fmt)
+
+def _clause_af(arguments, body, lineno=1):
+    arguments = ','.join([variable_af(arg) for arg in arguments])
+    fmt = locals()
+    return '{{clause, {lineno}, [{arguments}], [], [{body}]}}'.format(**fmt)
+
+def function_af(fn_name, argnames, clauses, lineno=1):
+    logging.warning('Only one function clause supported')
+    clauses = ','.join([_clause_af(argnames, c, lineno) for c in clauses])
+    fmt = {'fn_name': fn_name, 'argnum': len(argnames), 'clauses': clauses,
+            'lineno': lineno}
+    return '{{function, 1, {fn_name}, {argnum}, [{clauses}]}}'.format(**fmt)
 
 def stmt_form(nodes):
-    return '[%s]' % ','.join(nodes)
+    logging.warning('There is no abstract equivalent of Pythons Stmt')
+    return ','.join(nodes)
 
 def return_form(nodes):
+    logging.warning('There is no abstract equivalent of Pythons Return')
     return ','.join(nodes)

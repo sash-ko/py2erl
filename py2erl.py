@@ -14,6 +14,7 @@ import compiler
 from compiler.visitor import walk
 from visitors import ModuleVisitor
 import logging
+from errors import AbstractFormError
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(module)s:%(funcName)s %(asctime)s - %(message)s')
@@ -36,6 +37,8 @@ if __name__ == '__main__':
             #erl_out = compose_ast(visitor.erl_module,
             #                        visitor.erl_exports,
             #                        visitor.erl_functions)
+        except AbstractFormError, e:
+            print 'Abstract form error:', e
         except IOError, e:
             print 'Error while reading', fname
             logging.exception(e)

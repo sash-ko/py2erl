@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#import logging
+import logging
 from compiler.visitor import ASTVisitor, walk
 import erl
 
@@ -10,8 +10,13 @@ class ModuleVisitor(ASTVisitor):
     """
 
     def __init__(self):
+        # no super, ASTVisitor is old style class
         ASTVisitor.__init__(self)
         self.tree = []
+
+    def default(self, node):
+        logging.warning('Skip node', node)
+        return ASTVisitor.default(self, node)
 
     def visitStmt(self, node):
         visitor = ModuleVisitor()
@@ -24,7 +29,7 @@ class ModuleVisitor(ASTVisitor):
         cn = node.getChildren()
         visitor = ModuleVisitor()
         walk(cn[-1], visitor)
-        self.tree.append(erl.function_form(cn[1], cn[2], visitor.tree))
+        self.tree.append(erl.function_af(cn[1], cn[2], visitor.tree))
 
     def visitReturn(self, node):
         (value,) = node.getChildren()
@@ -37,12 +42,19 @@ class ModuleVisitor(ASTVisitor):
         visitor = ModuleVisitor()
         walk(left, visitor)
         walk(right, visitor)
-        self.tree.append(erl.add_form(*visitor.tree))
+        self.tree.append(erl.addition_af(*visitor.tree))
+
+    def visitSub(self, node):
+        (left, right) = node.getChildren()
+        visitor = ModuleVisitor()
+        walk(left, visitor)
+        walk(right, visitor)
+        self.tree.append(erl.substraction_af(*visitor.tree))
 
     def visitName(self, node):
         (name, ) = node.getChildren()
-        self.tree.append(erl.name_form(name))
+        self.tree.append(erl.variable_af(name))
 
     def visitConst(self, node):
         (value, ) = node.getChildren()
-        self.tree.append(erl.const_form(value))
+        self.tree.append(erl.number_af(value))
