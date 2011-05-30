@@ -3,6 +3,7 @@
 import logging
 from compiler.visitor import ASTVisitor, walk
 import erl
+from errors import NotSupportedNode
 
 class ModuleVisitor(ASTVisitor):
     """Recursively traverse Python AST and convert
@@ -16,10 +17,11 @@ class ModuleVisitor(ASTVisitor):
         self.exports = []
 
     def default(self, node, *args):
-        logging.warning('Skip node %s', node)
+        raise NotSupportedNode(node.__class__)
         return ASTVisitor.default(self, node)
 
     def visitFunction(self, node):
+        print 'aaaa', node.__class__
         # (decorators, name, argnames, defaults, flags, docs, code)
         cn = node.getChildren()
         fn_name = cn[1]
@@ -31,11 +33,19 @@ class ModuleVisitor(ASTVisitor):
                                                 visitor.children))
         self.exports.append(erl.export_af(fn_name, argnames))
 
+    def visitStmt(self, node):
+        for n in node.getChildren():
+            walk(n, self, self)
+
 class FunctionVisitor(ASTVisitor):
 
     def __init__(self):
         ASTVisitor.__init__(self)
         self.children = []
+
+    def default(self, node, *args):
+        raise NotSupportedNode(node.__class__)
+        return ASTVisitor.default(self, node)
 
     def _visitOp(self, node, fn):
         (left, right) = node.getChildren()
@@ -77,9 +87,10 @@ class FunctionVisitor(ASTVisitor):
         (value, ) = node.getChildren()
         self.children.append(erl.term_af(value))
 
-    #def visitReturn(self, node):
-    #    (value,) = node.getChildren()
-    #    visitor = ModuleVisitor()
-    #    walk(value, visitor)
-    #    self.tree.append(erl.return_form(visitor.tree))
+    def visitStmt(self, node):
+        for n in node.getChildren():
+            walk(n, self, self)
 
+    def visitReturn(self, node):
+        (value,) = node.getChildren()
+        walk(value, self, self)
