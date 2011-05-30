@@ -37,19 +37,24 @@ class FunctionVisitor(ASTVisitor):
         ASTVisitor.__init__(self)
         self.children = []
 
-    def visitAdd(self, node):
+    def _visitOp(self, node):
         (left, right) = node.getChildren()
         visitor = FunctionVisitor()
         walk(left, visitor)
         walk(right, visitor)
         self.children.append(erl.addition_af(*visitor.children))
 
+    def visitAdd(self, node):
+        self._visitOp(node)
+
     def visitSub(self, node):
-        (left, right) = node.getChildren()
-        visitor = FunctionVisitor()
-        walk(left, visitor)
-        walk(right, visitor)
-        self.children.append(erl.substraction_af(*visitor.children))
+        self._visitOp(node)
+
+    def visitMul(self, node):
+        self._visitOp(node)
+
+    def visitDiv(self, node):
+        self._visitOp(node)
 
     def visitName(self, node):
         (name, ) = node.getChildren()

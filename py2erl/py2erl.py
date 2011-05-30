@@ -43,7 +43,7 @@ if __name__ == '__main__':
                                     visitor.exports, visitor.functions)
 
                 retcode = subprocess.call(['erlc',
-                    'erl/{compiler}.erl'.format(compiler=COMPILER)])
+                    'py2erl/erl/{compiler}.erl'.format(compiler=COMPILER)])
                 if not retcode:
                     retcode = subprocess.call(['erl', '-noshell', '-eval',
                         "code:load_file('{compiler}'),"\
