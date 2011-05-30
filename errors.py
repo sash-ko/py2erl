@@ -5,5 +5,5 @@ class AbstractFormError(Exception):
         self.value = val
         self.valtype = valtype
     def __str__(self):
-        return 'Can not build abstract form for {} ({})'.format(self.valtype,
+        return 'Can not build abstract form for {0} ({1})'.format(self.valtype,
                                                                 self.value)

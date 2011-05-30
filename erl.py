@@ -46,12 +46,23 @@ def function_af(fn_name, argnames, clauses, lineno=1):
     clauses = ','.join([_clause_af(argnames, c, lineno) for c in clauses])
     fmt = {'fn_name': fn_name, 'argnum': len(argnames), 'clauses': clauses,
             'lineno': lineno}
-    return '{{function, {lineno}, {fn_name}, {argnum}, [{clauses}]}}'.format(**fmt)
+    fn_templ = '{{function, {lineno}, {fn_name}, {argnum}, [{clauses}]}}'
+    return fn_templ.format(**fmt)
 
-def stmt_form(nodes):
-    logging.warning('There is no abstract equivalent of Pythons Stmt')
-    return ','.join(nodes)
+def _attribute_af(at_name, attribute, lineno=1):
+    fmt = locals()
+    return '{{attribute, {lineno}, {at_name}, {attribute}}}'.format(**fmt)
 
-def return_form(nodes):
-    logging.warning('There is no abstract equivalent of Pythons Return')
-    return ','.join(nodes)
+def export_af(fn_name, argnames, lineno=1):
+    attribute = '[{{{fn_name}, {arity}}}]'.format(fn_name=fn_name,
+                                                    arity=len(argnames))
+    return _attribute_af('export', attribute, lineno)
+
+def module_af(name, lineno=1):
+    return _attribute_af('module', name, lineno)
+
+def full_af(module, exports, functions):
+    fmt = locals()
+    fmt['exports'] = ','.join(exports)
+    fmt['functions'] = ','.join(functions)
+    return '[{module}, {exports}, {functions}]'.format(**fmt)
