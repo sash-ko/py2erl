@@ -1,8 +1,13 @@
 Primitive and naive Python to Erlang compiler.
 
-Usage: python py2erl.py python_file
+Usage: 
+    python py2erl.py python_file.py
+    erl
+    code:load_file(python_file)
+    python_file:fn_name(1, 2)
 
-Idea: python code -> Python Abstract Syntax Tree -> Erlang abstract form -> compile
+
+Idea: python code -> Python Abstract Syntax Tree -> Erlang abstract format -> compile
 
 Docs:
     http://docs.python.org/library/compiler.html
