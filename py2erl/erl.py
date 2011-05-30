@@ -12,12 +12,14 @@ def variable_af(varname, lineno=1):
     fmt = locals()
     return "{{var, {lineno}, '{varname}'}}".format(**fmt)
 
-def number_af(val, lineno=1):
+def term_af(val, lineno=1):
     fmt = locals()
     if isinstance(val, float):
         fmt['typename'] = 'float'
     elif isinstance(val, int):
         fmt['typename'] = 'integer'
+    elif isinstance(val, basestring):
+        fmt['typename'] = 'string'
     else:
         raise AbstractFormError('Number', val)
     return '{{{typename}, {lineno}, {val}}}'.format(**fmt)
@@ -27,8 +29,17 @@ def addition_af(left, right, lineno=1):
     return _binary_op_af('+', left, right, lineno)
 
 def substraction_af(left, right, lineno=1):
-    """Abstract form of addition operation"""
+    """Abstract form of substraction operation"""
     return _binary_op_af('-', left, right, lineno)
+
+def multiplication_af(left, right, lineno=1):
+    """Abstract form of multiplication operation"""
+    return _binary_op_af('*', left, right, lineno)
+
+def division_af(left, right, lineno=1):
+    """Abstract form of division operation"""
+    return _binary_op_af('/', left, right, lineno)
+
 
 def _binary_op_af(op, left, right, lineno=1):
     """Abstract form of binary operations"""
@@ -66,3 +77,6 @@ def full_af(module, exports, functions):
     fmt['exports'] = ','.join(exports)
     fmt['functions'] = ','.join(functions)
     return '[{module}, {exports}, {functions}]'.format(**fmt)
+
+def io_format_af(items, lineno=1):
+    pass

@@ -37,24 +37,37 @@ class FunctionVisitor(ASTVisitor):
         ASTVisitor.__init__(self)
         self.children = []
 
-    def _visitOp(self, node):
+    def _visitOp(self, node, fn):
         (left, right) = node.getChildren()
         visitor = FunctionVisitor()
         walk(left, visitor)
         walk(right, visitor)
-        self.children.append(erl.addition_af(*visitor.children))
+        self.children.append(fn(*visitor.children))
 
     def visitAdd(self, node):
-        self._visitOp(node)
+        self._visitOp(node, erl.addition_af)
 
     def visitSub(self, node):
-        self._visitOp(node)
+        self._visitOp(node, erl.substraction_af)
 
     def visitMul(self, node):
-        self._visitOp(node)
+        self._visitOp(node, erl.multiplication_af)
 
     def visitDiv(self, node):
-        self._visitOp(node)
+        self._visitOp(node, erl.division_af)
+
+    def visitMod(self, node):
+        """ '%'opertation. Depends on context - can be format or
+        mod operator"""
+        logging.warning('Not implemented. Depends on context')
+
+    def visitPrintnl(self, node):
+        # node children format: ([node1, node2, ...,] dist)
+        nodes = node.getChildren()
+        nodes = nodes[0]
+        visitor = FunctionVisitor()
+        for n in nodes:
+            walk(nodes, visitor)
 
     def visitName(self, node):
         (name, ) = node.getChildren()
@@ -62,7 +75,7 @@ class FunctionVisitor(ASTVisitor):
 
     def visitConst(self, node):
         (value, ) = node.getChildren()
-        self.children.append(erl.number_af(value))
+        self.children.append(erl.term_af(value))
 
     #def visitReturn(self, node):
     #    (value,) = node.getChildren()

@@ -42,6 +42,8 @@ if __name__ == '__main__':
                 forms = erl.full_af(erl.module_af(module_name(fname)),
                                     visitor.exports, visitor.functions)
 
+                print forms
+
                 retcode = subprocess.call(['erlc',
                     'py2erl/erl/{compiler}.erl'.format(compiler=COMPILER)])
                 if not retcode:
