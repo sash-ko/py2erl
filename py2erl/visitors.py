@@ -100,12 +100,21 @@ class FunctionVisitor(ASTVisitor):
         logging.warning('Not implemented. Depends on context')
 
     def visitPrintnl(self, node):
+        """Print to io:format.
+        Print has several forms:
+            print 'test'
+            print 'test', var
+            print 'test %s' % var
+            print 'test {0}'.format(var)
+        """
         # node children format: ([node1, node2, ...,] dist)
         nodes = node.getChildren()
         nodes = nodes[0]
         visitor = FunctionVisitor()
         for n in nodes:
             walk(nodes, visitor, visitor)
+        visitor.children.append(erl.nil_af())
+        self.children.append(erl.io_format_af(visitor.children))
 
     def visitName(self, node):
         """Variable name.

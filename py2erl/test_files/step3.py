@@ -1,2 +1,2 @@
 def show(val):
-    print 'adsasd' % val
+    print 'adsasd'

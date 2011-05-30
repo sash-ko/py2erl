@@ -26,8 +26,11 @@ def test(a, b):
 
 """
 
-import logging
 from errors import AbstractFormError
+
+def atom_af(name, lineno=1):
+    fmt = locals()
+    return '{{atom, {lineno}, {name}}}'.format(**fmt)
 
 def variable_af(varname, lineno=1):
     """Variable name. Require further values binding."""
@@ -106,5 +109,14 @@ def full_af(module, exports, functions):
     fmt['functions'] = ','.join(functions)
     return '[{module}, {exports}, {functions}]'.format(**fmt)
 
+def _fn_call_af(module, fn_name, args, lineno=1):
+    fmt = locals()
+    return '{{call, {lineno}, {{remote, {lineno}, {module},'\
+            '{fn_name}}}, [{args}]}}'.format(**fmt)
+
 def io_format_af(items, lineno=1):
-    pass
+    items = ','.join(items)
+    return _fn_call_af(atom_af('io'), atom_af('format'), items, lineno)
+
+def nil_af(lineno=1):
+    return '{{nil, {lineno}}}'.format(lineno=lineno)

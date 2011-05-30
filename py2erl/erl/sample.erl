@@ -15,4 +15,4 @@ other(A, B, C) ->
     A + B - C.
 
 str_smaple() ->
-    io:format("~w~n", ["text"]).
+    io:format("test~n", []).
