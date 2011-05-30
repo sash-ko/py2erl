@@ -3,7 +3,7 @@
 """Primitive and naive Python to Erlang compiler.
 
 Main principle: convert Python abstract syntax tree (AST) to
-Erlang abstract form and compile it to binary code.
+Erlang abstract format and compile it to binary.
 
 Inspired by:
 http://stackoverflow.com/questions/1974236/string-to-abstract-syntax-tree
@@ -38,7 +38,7 @@ if __name__ == '__main__':
                 doc, module_body = module_tree.getChildren()
 
                 visitor = ModuleVisitor()
-                walk(module_tree, visitor, visitor)
+                walk(module_body, visitor, visitor)
                 forms = erl.full_af(erl.module_af(module_name(fname)),
                                     visitor.exports, visitor.functions)
 

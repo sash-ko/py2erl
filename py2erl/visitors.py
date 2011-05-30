@@ -6,8 +6,17 @@ import erl
 from errors import NotSupportedNode
 
 class ModuleVisitor(ASTVisitor):
-    """Recursively traverse Python AST and convert
-    it to Erlang abstract form
+    """Traverse Python Abstract syntax tree on module level.
+    Collect information about function declarations, namely
+    create export attribute (e.g. '-export([fn_name/arity]).')
+    for every function and function body in Erlang abstract fromat.
+
+    AST node handler - function with name "visitNodeName", e.g.
+    "visitFunction".
+
+    Raise exception NotSupportedNode if meet can not find aproptiate handler.
+
+    Note: line numbers are not supported.
     """
 
     def __init__(self):
@@ -17,11 +26,13 @@ class ModuleVisitor(ASTVisitor):
         self.exports = []
 
     def default(self, node, *args):
+        """Default node handler."""
         raise NotSupportedNode(node.__class__)
         return ASTVisitor.default(self, node)
 
     def visitFunction(self, node):
-        print 'aaaa', node.__class__
+        """Create export attribute and start traverse
+        function body (depth-first search)"""
         # (decorators, name, argnames, defaults, flags, docs, code)
         cn = node.getChildren()
         fn_name = cn[1]
@@ -34,10 +45,24 @@ class ModuleVisitor(ASTVisitor):
         self.exports.append(erl.export_af(fn_name, argnames))
 
     def visitStmt(self, node):
+        """Continue traversing in depth"""
         for n in node.getChildren():
             walk(n, self, self)
 
 class FunctionVisitor(ASTVisitor):
+    """Traverse function body (depth-first search).
+
+    Raise exception NotSupportedNode if meet can not find aproptiate handler.
+
+    Note: only one function clause is supported, e.g.
+        def test(a, b):
+            if a == 0:
+                return None
+            return a * b
+    can not be converted to:
+        test(0, _) -> 0;
+        test(A, B) -> A*B.
+    """
 
     def __init__(self):
         ASTVisitor.__init__(self)
@@ -48,6 +73,9 @@ class FunctionVisitor(ASTVisitor):
         return ASTVisitor.default(self, node)
 
     def _visitOp(self, node, fn):
+        """Traverse binary operators like '+', '-', '/', etc.
+        fn - function which abstract representation of particular operation.
+        """
         (left, right) = node.getChildren()
         visitor = FunctionVisitor()
         walk(left, visitor, visitor)
@@ -80,17 +108,32 @@ class FunctionVisitor(ASTVisitor):
             walk(nodes, visitor, visitor)
 
     def visitName(self, node):
+        """Variable name.
+
+        def test(a):
+            #...
+
+        visitName('a')
+        """
         (name, ) = node.getChildren()
         self.children.append(erl.variable_af(name))
 
     def visitConst(self, node):
+        """Constant value.
+        1 + 2
+
+        visitConst(1)
+        visitConst(2)
+        """
         (value, ) = node.getChildren()
         self.children.append(erl.term_af(value))
 
     def visitStmt(self, node):
+        """Continue traversing in depth"""
         for n in node.getChildren():
             walk(n, self, self)
 
     def visitReturn(self, node):
+        """Continue traversing in depth"""
         (value,) = node.getChildren()
         walk(value, self, self)
