@@ -15,8 +15,8 @@ class ModuleVisitor(ASTVisitor):
         self.functions = []
         self.exports = []
 
-    def default(self, node):
-        logging.warning('Skip node', node)
+    def default(self, node, *args):
+        logging.warning('Skip node %s', node)
         return ASTVisitor.default(self, node)
 
     def visitFunction(self, node):
@@ -26,7 +26,7 @@ class ModuleVisitor(ASTVisitor):
         argnames = cn[2]
         code = cn[-1]
         visitor = FunctionVisitor()
-        walk(code, visitor)
+        walk(code, visitor, visitor)
         self.functions.append(erl.function_af(fn_name, argnames,
                                                 visitor.children))
         self.exports.append(erl.export_af(fn_name, argnames))
@@ -40,8 +40,8 @@ class FunctionVisitor(ASTVisitor):
     def _visitOp(self, node, fn):
         (left, right) = node.getChildren()
         visitor = FunctionVisitor()
-        walk(left, visitor)
-        walk(right, visitor)
+        walk(left, visitor, visitor)
+        walk(right, visitor, visitor)
         self.children.append(fn(*visitor.children))
 
     def visitAdd(self, node):
@@ -67,7 +67,7 @@ class FunctionVisitor(ASTVisitor):
         nodes = nodes[0]
         visitor = FunctionVisitor()
         for n in nodes:
-            walk(nodes, visitor)
+            walk(nodes, visitor, visitor)
 
     def visitName(self, node):
         (name, ) = node.getChildren()

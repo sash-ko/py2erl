@@ -38,11 +38,9 @@ if __name__ == '__main__':
                 doc, module_body = module_tree.getChildren()
 
                 visitor = ModuleVisitor()
-                walk(module_tree, visitor)
+                walk(module_tree, visitor, visitor)
                 forms = erl.full_af(erl.module_af(module_name(fname)),
                                     visitor.exports, visitor.functions)
-
-                print forms
 
                 retcode = subprocess.call(['erlc',
                     'py2erl/erl/{compiler}.erl'.format(compiler=COMPILER)])
