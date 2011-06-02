@@ -48,6 +48,7 @@ def term_af(val, lineno=1):
         fmt['typename'] = 'integer'
     elif isinstance(val, basestring):
         fmt['typename'] = 'string'
+        fmt['val'] = '"{0}"'.format(val)
     else:
         raise AbstractFormError('Number', val)
     return '{{{typename}, {lineno}, {val}}}'.format(**fmt)
